@@ -1,0 +1,2 @@
+# Kopiyka
+Family budget manager
