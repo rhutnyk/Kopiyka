@@ -1,12 +1,14 @@
+using System.Net;
+using System.Text.Json;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
-using System.Net;
 
 namespace Kopiyka.Api.Functions;
 
 public class HealthFunction
 {
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
     private readonly ILogger<HealthFunction> _logger;
 
     public HealthFunction(ILogger<HealthFunction> logger)
@@ -15,13 +17,18 @@ public class HealthFunction
     }
 
     [Function("Health")]
-    public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "v1/health")] HttpRequestData req)
+    public async Task<HttpResponseData> Run(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "api/v1/health")] HttpRequestData req)
     {
         _logger.LogInformation("Health check invoked");
 
         var response = req.CreateResponse(HttpStatusCode.OK);
-        response.Headers.Add("Content-Type", "application/json");
-        response.WriteString("{\"status\":\"ok\"}");
+        await response.WriteAsJsonAsync(new
+        {
+            status = "ok",
+            timestamp = DateTime.UtcNow,
+            version = "v1"
+        }, JsonOptions);
 
         return response;
     }
