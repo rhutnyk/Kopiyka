@@ -1,0 +1,22 @@
+# Node
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/tsconfig.*.tsbuildinfo
+frontend/vite.config.d.ts
+frontend/vite.config.js
+
+# Build outputs
+backend/Kopiyka.Api/bin/
+backend/Kopiyka.Api/obj/
+
+# Environment/local config
+*.env
+frontend/.env
+backend/Kopiyka.Api/local.settings.json
+
+# Tools
+.dotnet/
+dotnet-install.sh
+.vscode/
