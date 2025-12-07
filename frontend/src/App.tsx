@@ -1,33 +1,28 @@
 import './App.css';
-import logo from './assets/logo.svg';
+import React from 'react';
+import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
+import { AppLayout } from './components/AppLayout';
+import { AuthProvider } from './auth/AuthProvider';
+import { HouseholdsPage } from './pages/HouseholdsPage';
+import { CategoriesPage } from './pages/CategoriesPage';
+import { AccountsPage } from './pages/AccountsPage';
+import { TransactionsPage } from './pages/TransactionsPage';
 
 function App() {
   return (
-    <div className="app">
-      <header className="hero">
-        <img src={logo} className="logo" alt="Kopiyka logo" />
-        <div>
-          <p className="eyebrow">Azure Static Web App + .NET backend</p>
-          <h1>Kopiyka — family budget hub</h1>
-          <p className="lede">
-            Fresh project scaffolding for a React front end and Azure Functions backend. No business logic yet, just a
-            welcoming starting point.
-          </p>
-          <div className="cta-row">
-            <a className="cta" href="/docs/feature-plan">Explore feature plan</a>
-            <a className="secondary" href="/docs/architecture">Read architecture notes</a>
-          </div>
-        </div>
-      </header>
-      <section className="panel">
-        <h2>Next steps</h2>
-        <ul>
-          <li>Wire the React app to the Functions API once endpoints are defined.</li>
-          <li>Implement auth + data layer aligned with the feature plan.</li>
-          <li>Deploy to Azure Static Web Apps to validate the pipeline.</li>
-        </ul>
-      </section>
-    </div>
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          <Route path="/" element={<AppLayout />}>
+            <Route index element={<Navigate to="/households" replace />} />
+            <Route path="households" element={<HouseholdsPage />} />
+            <Route path="categories" element={<CategoriesPage />} />
+            <Route path="accounts" element={<AccountsPage />} />
+            <Route path="transactions" element={<TransactionsPage />} />
+          </Route>
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 
