@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, Navigate } from 'react-router-dom';
 import { fetchProfile } from '../api/profile';
 import { HouseholdMembership } from '../api/dto';
 import { useAuth } from '../auth/AuthProvider';
@@ -7,7 +7,7 @@ import { useAuth } from '../auth/AuthProvider';
 const ACTIVE_HOUSEHOLD_KEY = 'kopiyka-active-household';
 
 export const AppLayout: React.FC = () => {
-  const { session, status, loginMock, logout } = useAuth();
+  const { session, status, logout } = useAuth();
   const [memberships, setMemberships] = useState<HouseholdMembership[]>([]);
   const [activeHousehold, setActiveHousehold] = useState<string | null>(
     localStorage.getItem(ACTIVE_HOUSEHOLD_KEY),
@@ -16,6 +16,8 @@ export const AppLayout: React.FC = () => {
 
   useEffect(() => {
     if (status !== 'authenticated') {
+      setMemberships([]);
+      setActiveHousehold(null);
       return;
     }
 
@@ -50,6 +52,10 @@ export const AppLayout: React.FC = () => {
     setActiveHousehold(householdId);
   };
 
+  if (status === 'unauthenticated') {
+    return <Navigate to="/sign-in" replace />;
+  }
+
   return (
     <div className="app-shell">
       <header className="topbar">
@@ -61,18 +67,14 @@ export const AppLayout: React.FC = () => {
           <NavLink to="/transactions">Transactions</NavLink>
         </nav>
         <div className="session">
+          {status === 'loading' && <span className="hint">Loading session…</span>}
           {status === 'authenticated' && (
             <>
-              <span className="user">{session?.userName}</span>
+              <span className="user">{session?.displayName || session?.email}</span>
               <button onClick={logout} className="link-button">
                 Sign out
               </button>
             </>
-          )}
-          {status === 'unauthenticated' && (
-            <button onClick={() => loginMock()} className="primary">
-              Sign in (mock)
-            </button>
           )}
         </div>
       </header>
@@ -93,6 +95,9 @@ export const AppLayout: React.FC = () => {
                 </option>
               ))}
             </select>
+          )}
+          {status === 'authenticated' && memberships.length === 0 && profileStatus === 'idle' && (
+            <div className="hint">No households available yet.</div>
           )}
         </div>
       </section>
