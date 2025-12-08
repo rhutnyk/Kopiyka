@@ -42,7 +42,7 @@ public class TransactionsFunction
         };
 
         var response = req.CreateResponse(HttpStatusCode.OK);
-        await response.WriteAsJsonAsync(transactions, JsonOptions);
+        await response.WriteAsJsonAsync(transactions);
         return response;
     }
 
@@ -68,7 +68,7 @@ public class TransactionsFunction
         if (errors.Count > 0)
         {
             var invalid = req.CreateResponse(HttpStatusCode.BadRequest);
-            await invalid.WriteAsJsonAsync(new { errors }, JsonOptions);
+            await invalid.WriteAsJsonAsync(new { errors });
             return invalid;
         }
 
@@ -82,7 +82,7 @@ public class TransactionsFunction
             request.OccurredAt);
 
         var response = req.CreateResponse(HttpStatusCode.Created);
-        await response.WriteAsJsonAsync(created, JsonOptions);
+        await response.WriteAsJsonAsync(created);
         return response;
     }
 
@@ -109,7 +109,7 @@ public class TransactionsFunction
         if (errors.Count > 0)
         {
             var invalid = req.CreateResponse(HttpStatusCode.BadRequest);
-            await invalid.WriteAsJsonAsync(new { errors }, JsonOptions);
+            await invalid.WriteAsJsonAsync(new { errors });
             return invalid;
         }
 
@@ -123,7 +123,7 @@ public class TransactionsFunction
             request.OccurredAt);
 
         var response = req.CreateResponse(HttpStatusCode.OK);
-        await response.WriteAsJsonAsync(updated, JsonOptions);
+        await response.WriteAsJsonAsync(updated);
         return response;
     }
 }

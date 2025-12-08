@@ -8,7 +8,6 @@ namespace Kopiyka.Api.Functions;
 
 public class HealthFunction
 {
-    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
     private readonly ILogger<HealthFunction> _logger;
 
     public HealthFunction(ILogger<HealthFunction> logger)
@@ -28,7 +27,7 @@ public class HealthFunction
             status = "ok",
             timestamp = DateTime.UtcNow,
             version = "v1"
-        }, JsonOptions);
+        });
 
         return response;
     }

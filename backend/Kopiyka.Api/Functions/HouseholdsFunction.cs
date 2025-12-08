@@ -39,7 +39,7 @@ public class HouseholdsFunction
         };
 
         var response = req.CreateResponse(HttpStatusCode.OK);
-        await response.WriteAsJsonAsync(households, JsonOptions);
+        await response.WriteAsJsonAsync(households);
         return response;
     }
 
@@ -66,14 +66,14 @@ public class HouseholdsFunction
         if (errors.Count > 0)
         {
             var invalid = req.CreateResponse(HttpStatusCode.BadRequest);
-            await invalid.WriteAsJsonAsync(new { errors }, JsonOptions);
+            await invalid.WriteAsJsonAsync(new { errors });
             return invalid;
         }
 
         var created = new HouseholdResponse(Guid.NewGuid(), request.Name, request.DefaultCurrency, DateTime.UtcNow);
 
         var response = req.CreateResponse(HttpStatusCode.Created);
-        await response.WriteAsJsonAsync(created, JsonOptions);
+        await response.WriteAsJsonAsync(created);
         return response;
     }
 
@@ -91,7 +91,7 @@ public class HouseholdsFunction
 
         var response = req.CreateResponse(HttpStatusCode.OK);
         var household = new HouseholdResponse(householdId, "Demo Household", "USD", DateTime.UtcNow.AddDays(-10));
-        await response.WriteAsJsonAsync(household, JsonOptions);
+        await response.WriteAsJsonAsync(household);
         return response;
     }
 
@@ -119,14 +119,14 @@ public class HouseholdsFunction
         if (errors.Count > 0)
         {
             var invalid = req.CreateResponse(HttpStatusCode.BadRequest);
-            await invalid.WriteAsJsonAsync(new { errors }, JsonOptions);
+            await invalid.WriteAsJsonAsync(new { errors });
             return invalid;
         }
 
         var updated = new HouseholdResponse(householdId, request.Name, "USD", DateTime.UtcNow.AddDays(-10));
 
         var response = req.CreateResponse(HttpStatusCode.OK);
-        await response.WriteAsJsonAsync(updated, JsonOptions);
+        await response.WriteAsJsonAsync(updated);
         return response;
     }
 }

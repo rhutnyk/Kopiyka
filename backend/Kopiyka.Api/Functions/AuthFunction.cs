@@ -9,8 +9,6 @@ namespace Kopiyka.Api.Functions;
 
 public class AuthFunction
 {
-    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
-
     [Function("GetCurrentUser")]
     public async Task<HttpResponseData> GetCurrentUser(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "api/v1/auth/me")] HttpRequestData req)
@@ -39,7 +37,7 @@ public class AuthFunction
             memberships);
 
         var response = req.CreateResponse(HttpStatusCode.OK);
-        await response.WriteAsJsonAsync(profile, JsonOptions);
+        await response.WriteAsJsonAsync(profile);
         return response;
     }
 }
