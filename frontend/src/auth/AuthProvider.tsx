@@ -1,27 +1,22 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { API_BASE_URL } from '../env';
+import { AuthSession as ApiAuthSession, signIn, signInWithGoogle, signUp } from '../api/auth';
 
-type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
+export type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
 
-type AuthSession = {
-  userName: string;
-  accessToken?: string;
-};
+export type AuthSession = ApiAuthSession;
 
 type AuthContextValue = {
   status: AuthStatus;
   session: AuthSession | null;
-  loginMock: (userName?: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, displayName: string) => Promise<void>;
+  signInWithGoogle: (email: string, displayName: string) => Promise<void>;
   logout: () => void;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 const SESSION_KEY = 'kopiyka-auth-session';
-
-const mockPrincipal: AuthSession = {
-  userName: 'demo@contoso.test',
-  accessToken: 'mock-token',
-};
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [status, setStatus] = useState<AuthStatus>('loading');
@@ -37,45 +32,60 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       } catch (error) {
         console.warn('Failed to parse stored session', error);
+        localStorage.removeItem(SESSION_KEY);
       }
     }
 
-    const loadAzureAuth = async () => {
-      try {
-        const response = await fetch('/.auth/me');
-        if (!response.ok) throw new Error('No Static Web Apps auth');
-        const payload = await response.json();
-        const clientPrincipal = payload.clientPrincipal;
-        if (!clientPrincipal) throw new Error('Missing client principal');
-        const principal: AuthSession = {
-          userName: clientPrincipal.userDetails,
-          accessToken: clientPrincipal.userId,
-        };
-        localStorage.setItem(SESSION_KEY, JSON.stringify(principal));
-        setSession(principal);
-        setStatus('authenticated');
-      } catch (error) {
-        console.info('Falling back to mock auth flow', error);
-        setStatus('unauthenticated');
-      }
-    };
-
-    loadAzureAuth();
+    setStatus('unauthenticated');
   }, []);
 
-  const loginMock = async (userName = mockPrincipal.userName) => {
-    localStorage.setItem(SESSION_KEY, JSON.stringify({ ...mockPrincipal, userName }));
-    setSession({ ...mockPrincipal, userName });
+  const persistSession = useCallback((payload: ApiAuthSession) => {
+    localStorage.setItem(SESSION_KEY, JSON.stringify(payload));
+    setSession(payload);
     setStatus('authenticated');
-  };
+  }, []);
 
-  const logout = () => {
+  const handleSignIn = useCallback(
+    async (email: string, password: string) => {
+      const nextSession = await signIn(email, password);
+      persistSession(nextSession);
+    },
+    [persistSession],
+  );
+
+  const handleSignUp = useCallback(
+    async (email: string, password: string, displayName: string) => {
+      const nextSession = await signUp(email, password, displayName);
+      persistSession(nextSession);
+    },
+    [persistSession],
+  );
+
+  const handleGoogleSignIn = useCallback(
+    async (email: string, displayName: string) => {
+      const nextSession = await signInWithGoogle(email, displayName);
+      persistSession(nextSession);
+    },
+    [persistSession],
+  );
+
+  const logout = useCallback(() => {
     localStorage.removeItem(SESSION_KEY);
     setSession(null);
     setStatus('unauthenticated');
-  };
+  }, []);
 
-  const value = useMemo(() => ({ status, session, loginMock, logout }), [status, session]);
+  const value = useMemo(
+    () => ({
+      status,
+      session,
+      signIn: handleSignIn,
+      signUp: handleSignUp,
+      signInWithGoogle: handleGoogleSignIn,
+      logout,
+    }),
+    [status, session, handleSignIn, handleSignUp, handleGoogleSignIn, logout],
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

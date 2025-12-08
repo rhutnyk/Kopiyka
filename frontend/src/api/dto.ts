@@ -1,11 +1,12 @@
 export type HouseholdMembership = {
   householdId: string;
   householdName: string;
-  role: 'owner' | 'member';
+  role: 'owner' | 'member' | 'viewer';
 };
 
 export type ProfileResponse = {
-  userId: string;
+  id: string;
+  email: string;
   displayName: string;
   memberships: HouseholdMembership[];
 };

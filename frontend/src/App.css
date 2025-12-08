@@ -132,7 +132,8 @@ h1 {
 }
 
 .primary,
-.link-button {
+.link-button,
+.google-button {
   border: none;
   background: none;
   cursor: pointer;
@@ -184,6 +185,123 @@ h1 {
   color: #15803d;
 }
 
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem 1rem 3rem;
+}
+
+.auth-card {
+  width: min(520px, 100%);
+  background: white;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  padding: 2rem;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.form-title {
+  margin: 0;
+  font-size: 1.75rem;
+}
+
+.form-subtitle {
+  margin: 0;
+  color: #475569;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.input-group input {
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.7rem;
+  border: 1px solid #cbd5e1;
+  font-weight: 500;
+}
+
+.input-group input:focus {
+  outline: 2px solid #0ea5e9;
+  border-color: #0ea5e9;
+}
+
+.auth-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #475569;
+  font-weight: 600;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  height: 1px;
+  flex: 1;
+  background: #cbd5e1;
+}
+
+.google-button {
+  border: 1px solid #cbd5e1;
+  border-radius: 0.7rem;
+  padding: 0.65rem 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #0f172a;
+  width: 100%;
+  justify-content: center;
+}
+
+.google-icon {
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 1px solid #cbd5e1;
+  font-weight: 800;
+  color: #ea4335;
+  background: white;
+}
+
+.auth-loading {
+  display: grid;
+  place-items: center;
+  min-height: 60vh;
+  color: #475569;
+  font-weight: 600;
+}
+
 @media (max-width: 768px) {
   .topbar {
     flex-direction: column;
@@ -198,5 +316,9 @@ h1 {
 
   .nav-links {
     flex-wrap: wrap;
+  }
+
+  .auth-card {
+    padding: 1.25rem;
   }
 }
