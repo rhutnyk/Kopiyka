@@ -16,7 +16,7 @@ public class AuthFunction
 
     [Function("SignUp")]
     public async Task<HttpResponseData> SignUp(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "api/v1/auth/sign-up")] HttpRequestData req)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "v1/auth/sign-up")] HttpRequestData req)
     {
         var payload = await JsonSerializer.DeserializeAsync<SignUpRequest>(req.Body, SerializerOptions);
         if (payload is null || string.IsNullOrWhiteSpace(payload.Email) || string.IsNullOrWhiteSpace(payload.Password)
@@ -38,7 +38,7 @@ public class AuthFunction
 
     [Function("SignIn")]
     public async Task<HttpResponseData> SignIn(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "api/v1/auth/sign-in")] HttpRequestData req)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "v1/auth/sign-in")] HttpRequestData req)
     {
         var payload = await JsonSerializer.DeserializeAsync<SignInRequest>(req.Body, SerializerOptions);
         if (payload is null || string.IsNullOrWhiteSpace(payload.Email) || string.IsNullOrWhiteSpace(payload.Password))
@@ -59,7 +59,7 @@ public class AuthFunction
 
     [Function("GoogleSignIn")]
     public async Task<HttpResponseData> GoogleSignIn(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "api/v1/auth/google")] HttpRequestData req)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "v1/auth/google")] HttpRequestData req)
     {
         var payload = await JsonSerializer.DeserializeAsync<GoogleSignInRequest>(req.Body, SerializerOptions);
         if (payload is null || string.IsNullOrWhiteSpace(payload.Email))
@@ -77,7 +77,7 @@ public class AuthFunction
 
     [Function("GetCurrentUser")]
     public async Task<HttpResponseData> GetCurrentUser(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "api/v1/auth/me")] HttpRequestData req)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "v1/auth/me")] HttpRequestData req)
     {
         if (!TryReadBearer(req, out var token))
         {
