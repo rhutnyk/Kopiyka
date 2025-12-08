@@ -13,6 +13,11 @@ Family budget manager (work-in-progress) powered by React + Azure Functions.
 - .NET 8 SDK
 - (Optional) Azure Functions Core Tools for local API hosting
 
+### Quick start (from the repo root)
+- `npm run dev:frontend` — start the Vite dev server for the React app.
+- `npm run dev:api` — run the Azure Functions host with `dotnet watch`.
+- `npm run dev` — run both services together using `concurrently`.
+
 ### Frontend
 ```bash
 cd frontend
@@ -32,6 +37,7 @@ The sample `HealthFunction` responds to `GET /api/v1/health`.
 ### Documentation
 - Architecture overview: [`docs/architecture.md`](docs/architecture.md)
 - Feature plan/backlog: [`docs/feature-plan.md`](docs/feature-plan.md)
+- Contributor workflow and CI details: [`CONTRIBUTING.md`](CONTRIBUTING.md)
 
 ## Deployment target
 - Azure Static Web Apps for front end + Functions API, using Azure SQL for data.

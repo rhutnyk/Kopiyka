@@ -46,7 +46,10 @@ export const AccountsPage: React.FC = () => {
           {accounts.map((account) => (
             <li key={account.id} className="card">
               <h3>{account.name}</h3>
-              <p className="muted">Balance: {account.balance.toLocaleString(undefined, { style: 'currency', currency: 'USD' })}</p>
+              <p className="muted">
+                Balance:{' '}
+                {account.balance.toLocaleString(undefined, { style: 'currency', currency: 'USD' })}
+              </p>
             </li>
           ))}
         </ul>
