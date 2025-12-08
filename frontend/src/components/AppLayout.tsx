@@ -10,7 +10,7 @@ export const AppLayout: React.FC = () => {
   const { session, status, loginMock, logout } = useAuth();
   const [memberships, setMemberships] = useState<HouseholdMembership[]>([]);
   const [activeHousehold, setActiveHousehold] = useState<string | null>(
-    localStorage.getItem(ACTIVE_HOUSEHOLD_KEY)
+    localStorage.getItem(ACTIVE_HOUSEHOLD_KEY),
   );
   const [profileStatus, setProfileStatus] = useState<'idle' | 'loading' | 'error'>('idle');
 
