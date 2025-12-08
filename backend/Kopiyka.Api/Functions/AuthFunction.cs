@@ -96,7 +96,8 @@ public class AuthFunction
             InMemoryIdentityStore.GetMembershipsForUser(user));
 
         var response = req.CreateResponse(HttpStatusCode.OK);
-        await response.WriteAsJsonAsync(profile, jsonSerializerOptions: SerializerOptions);
+        response.Headers.Add("Content-Type", "application/json");
+        response.WriteString(JsonSerializer.Serialize(profile, SerializerOptions));
         return response;
     }
 
