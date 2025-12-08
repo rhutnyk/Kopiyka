@@ -28,7 +28,7 @@ public class AccountsFunction
         };
 
         var response = req.CreateResponse(HttpStatusCode.OK);
-        await response.WriteAsJsonAsync(accounts, JsonOptions);
+        await response.WriteAsJsonAsync(accounts);
         return response;
     }
 
@@ -54,13 +54,13 @@ public class AccountsFunction
         if (errors.Count > 0)
         {
             var invalid = req.CreateResponse(HttpStatusCode.BadRequest);
-            await invalid.WriteAsJsonAsync(new { errors }, JsonOptions);
+            await invalid.WriteAsJsonAsync(new { errors });
             return invalid;
         }
 
         var created = new AccountResponse(Guid.NewGuid(), request.Name, request.Type, request.Currency, 0);
         var response = req.CreateResponse(HttpStatusCode.Created);
-        await response.WriteAsJsonAsync(created, JsonOptions);
+        await response.WriteAsJsonAsync(created);
         return response;
     }
 
@@ -87,13 +87,13 @@ public class AccountsFunction
         if (errors.Count > 0)
         {
             var invalid = req.CreateResponse(HttpStatusCode.BadRequest);
-            await invalid.WriteAsJsonAsync(new { errors }, JsonOptions);
+            await invalid.WriteAsJsonAsync(new { errors });
             return invalid;
         }
 
         var updated = new AccountResponse(accountId, request.Name, request.Type, "USD", 1200m);
         var response = req.CreateResponse(HttpStatusCode.OK);
-        await response.WriteAsJsonAsync(updated, JsonOptions);
+        await response.WriteAsJsonAsync(updated);
         return response;
     }
 }

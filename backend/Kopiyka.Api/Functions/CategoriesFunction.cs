@@ -28,7 +28,7 @@ public class CategoriesFunction
         };
 
         var response = req.CreateResponse(HttpStatusCode.OK);
-        await response.WriteAsJsonAsync(categories, JsonOptions);
+        await response.WriteAsJsonAsync(categories);
         return response;
     }
 
@@ -54,13 +54,13 @@ public class CategoriesFunction
         if (errors.Count > 0)
         {
             var invalid = req.CreateResponse(HttpStatusCode.BadRequest);
-            await invalid.WriteAsJsonAsync(new { errors }, JsonOptions);
+            await invalid.WriteAsJsonAsync(new { errors });
             return invalid;
         }
 
         var created = new CategoryResponse(Guid.NewGuid(), request.Name, request.Type, request.ParentCategoryId);
         var response = req.CreateResponse(HttpStatusCode.Created);
-        await response.WriteAsJsonAsync(created, JsonOptions);
+        await response.WriteAsJsonAsync(created);
         return response;
     }
 
@@ -87,13 +87,13 @@ public class CategoriesFunction
         if (errors.Count > 0)
         {
             var invalid = req.CreateResponse(HttpStatusCode.BadRequest);
-            await invalid.WriteAsJsonAsync(new { errors }, JsonOptions);
+            await invalid.WriteAsJsonAsync(new { errors });
             return invalid;
         }
 
         var updated = new CategoryResponse(categoryId, request.Name, request.Type, request.ParentCategoryId);
         var response = req.CreateResponse(HttpStatusCode.OK);
-        await response.WriteAsJsonAsync(updated, JsonOptions);
+        await response.WriteAsJsonAsync(updated);
         return response;
     }
 }
