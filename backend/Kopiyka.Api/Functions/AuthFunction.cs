@@ -1,9 +1,13 @@
+using System.Collections.Concurrent;
 using System.Net;
 using System.Text.Json;
 using Kopiyka.Api.Contracts.Auth;
-using Kopiyka.Api.Security;
+using Kopiyka.Api.Data;
+using Kopiyka.Api.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace Kopiyka.Api.Functions;
 
@@ -13,6 +17,17 @@ public class AuthFunction
     {
         PropertyNameCaseInsensitive = true
     };
+
+    private static readonly ConcurrentDictionary<string, Guid> ActiveTokens = new();
+
+    private readonly KopiykaDbContext _dbContext;
+    private readonly IPasswordHasher<User> _passwordHasher;
+
+    public AuthFunction(KopiykaDbContext dbContext, IPasswordHasher<User> passwordHasher)
+    {
+        _dbContext = dbContext;
+        _passwordHasher = passwordHasher;
+    }
 
     [Function("SignUp")]
     public async Task<HttpResponseData> SignUp(
@@ -27,7 +42,27 @@ public class AuthFunction
 
         try
         {
-            var (user, token) = InMemoryIdentityStore.SignUp(payload.Email, payload.Password, payload.DisplayName);
+            var normalizedEmail = payload.Email.Trim().ToLowerInvariant();
+            var displayName = payload.DisplayName.Trim();
+
+            if (await _dbContext.Users.AsNoTracking().AnyAsync(u => u.Email == normalizedEmail))
+            {
+                return CreateErrorResponse(req, HttpStatusCode.Conflict, "An account with that email already exists.");
+            }
+
+            var user = new User
+            {
+                Id = Guid.NewGuid(),
+                Email = normalizedEmail,
+                DisplayName = displayName
+            };
+
+            user.PasswordHash = _passwordHasher.HashPassword(user, payload.Password);
+
+            _dbContext.Users.Add(user);
+            await _dbContext.SaveChangesAsync();
+
+            var token = IssueToken(user.Id);
             return CreateSessionResponse(req, user, token, HttpStatusCode.Created);
         }
         catch (InvalidOperationException ex)
@@ -46,15 +81,26 @@ public class AuthFunction
             return CreateErrorResponse(req, HttpStatusCode.BadRequest, "Email and password are required.");
         }
 
-        try
+        var normalizedEmail = payload.Email.Trim().ToLowerInvariant();
+        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == normalizedEmail);
+        if (user is null)
         {
-            var (user, token) = InMemoryIdentityStore.SignIn(payload.Email, payload.Password);
-            return CreateSessionResponse(req, user, token);
+            return CreateErrorResponse(req, HttpStatusCode.Unauthorized, "We couldn't find an account with that email.");
         }
-        catch (UnauthorizedAccessException ex)
+
+        if (string.IsNullOrEmpty(user.PasswordHash))
         {
-            return CreateErrorResponse(req, HttpStatusCode.Unauthorized, ex.Message);
+            return CreateErrorResponse(req, HttpStatusCode.Unauthorized, "This account uses Google sign-in.");
         }
+
+        var verification = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, payload.Password);
+        if (verification == PasswordVerificationResult.Failed)
+        {
+            return CreateErrorResponse(req, HttpStatusCode.Unauthorized, "Incorrect password.");
+        }
+
+        var token = IssueToken(user.Id);
+        return CreateSessionResponse(req, user, token);
     }
 
     [Function("GoogleSignIn")]
@@ -71,7 +117,23 @@ public class AuthFunction
             ? payload.Email.Split('@')[0]
             : payload.DisplayName;
 
-        var (user, token) = InMemoryIdentityStore.SignInWithGoogle(payload.Email, displayName);
+        var normalizedEmail = payload.Email.Trim().ToLowerInvariant();
+        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == normalizedEmail);
+        if (user is null)
+        {
+            user = new User
+            {
+                Id = Guid.NewGuid(),
+                Email = normalizedEmail,
+                DisplayName = displayName,
+                PasswordHash = string.Empty
+            };
+
+            _dbContext.Users.Add(user);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        var token = IssueToken(user.Id);
         return CreateSessionResponse(req, user, token);
     }
 
@@ -84,16 +146,18 @@ public class AuthFunction
             return CreateErrorResponse(req, HttpStatusCode.Unauthorized, "Missing access token.");
         }
 
-        if (!InMemoryIdentityStore.TryGetUser(token, out var user) || user is null)
+        if (!ActiveTokens.TryGetValue(token, out var userId))
         {
             return CreateErrorResponse(req, HttpStatusCode.Unauthorized, "Invalid or expired session.");
         }
 
-        var profile = new CurrentUserProfile(
-            user.Id,
-            user.Email,
-            user.DisplayName,
-            InMemoryIdentityStore.GetMembershipsForUser(user));
+        var user = await _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
+        if (user is null)
+        {
+            return CreateErrorResponse(req, HttpStatusCode.Unauthorized, "Invalid or expired session.");
+        }
+
+        var profile = new CurrentUserProfile(user.Id, user.Email, user.DisplayName, Array.Empty<MembershipSummary>());
 
         var response = req.CreateResponse(HttpStatusCode.OK);
         response.Headers.Add("Content-Type", "application/json");
@@ -136,16 +200,22 @@ public class AuthFunction
 
     private static HttpResponseData CreateSessionResponse(
         HttpRequestData req,
-        InMemoryUser user,
+        User user,
         string token,
         HttpStatusCode statusCode = HttpStatusCode.OK)
     {
-        var memberships = InMemoryIdentityStore.GetMembershipsForUser(user);
-        var session = new AuthSession(user.Id, user.Email, user.DisplayName, token, memberships);
+        var session = new AuthSession(user.Id, user.Email, user.DisplayName, token, Array.Empty<MembershipSummary>());
 
         var response = req.CreateResponse(statusCode);
         response.Headers.Add("Content-Type", "application/json");
         response.WriteString(JsonSerializer.Serialize(session, SerializerOptions));
         return response;
+    }
+
+    private static string IssueToken(Guid userId)
+    {
+        var token = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+        ActiveTokens[token] = userId;
+        return token;
     }
 }
