@@ -16,5 +16,6 @@ builder.Services
 
 builder.Services.AddDbContext<KopiykaDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddSingleton<Microsoft.AspNetCore.Identity.IPasswordHasher<Kopiyka.Api.Models.User>, Microsoft.AspNetCore.Identity.PasswordHasher<Kopiyka.Api.Models.User>>();
 
 builder.Build().Run();

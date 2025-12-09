@@ -51,6 +51,7 @@ public class KopiykaDbContext : DbContext
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasIndex(u => u.Email).IsUnique();
+            entity.Property(u => u.PasswordHash).IsRequired().HasMaxLength(512);
         });
     }
 
@@ -123,7 +124,7 @@ public class KopiykaDbContext : DbContext
             entity.HasOne(t => t.Household)
                 .WithMany(h => h.Transactions)
                 .HasForeignKey(t => t.HouseholdId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(t => t.Account)
                 .WithMany(a => a.Transactions)
@@ -133,7 +134,7 @@ public class KopiykaDbContext : DbContext
             entity.HasOne(t => t.Category)
                 .WithMany(c => c.Transactions)
                 .HasForeignKey(t => t.CategoryId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 
@@ -148,7 +149,7 @@ public class KopiykaDbContext : DbContext
             entity.HasOne(r => r.Household)
                 .WithMany(h => h.RecurringTemplates)
                 .HasForeignKey(r => r.HouseholdId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(r => r.Account)
                 .WithMany(a => a.RecurringTemplates)
@@ -158,7 +159,7 @@ public class KopiykaDbContext : DbContext
             entity.HasOne(r => r.Category)
                 .WithMany(c => c.RecurringTemplates)
                 .HasForeignKey(r => r.CategoryId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 
@@ -178,7 +179,7 @@ public class KopiykaDbContext : DbContext
             entity.HasOne(b => b.Category)
                 .WithMany(c => c.Budgets)
                 .HasForeignKey(b => b.CategoryId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 

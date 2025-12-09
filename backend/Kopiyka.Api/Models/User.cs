@@ -10,5 +10,8 @@ public class User : AuditableEntity
     [MaxLength(100)]
     public string DisplayName { get; set; } = string.Empty;
 
+    [MaxLength(512)]
+    public string PasswordHash { get; set; } = string.Empty;
+
     public ICollection<Membership> Memberships { get; set; } = new List<Membership>();
 }
